@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-//import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export default function FileUpload() {
   const [selectedFile, setSelectedFile] = useState();
@@ -13,42 +11,21 @@ export default function FileUpload() {
     setSuccess(false);
   };
 
-  console.log(process.env.NEXT_PUBLIC_ACCESSKEYID);
-  console.log(process.env.NEXT_PUBLIC_SECRETACCESSKEY);
-
   const handleUpload = async () => {
-    const client = new S3Client({
-      credentials: {
-        accessKeyId: process.env.NEXT_PUBLIC_ACCESSKEYID,
-        secretAccessKey: process.env.NEXT_PUBLIC_SECRETACCESSKEY,
-      },
-      region: process.env.NEXT_PUBLIC_REGION,
-    });
-
-    const command = new PutObjectCommand({
-      Bucket: process.env.NEXT_PUBLIC_BUCKET,
-      Key: selectedFile.name,
-      Body: selectedFile,
-    });
-
-    console.log(selectedFile);
+    const data = new FormData();
+    data.set("file", selectedFile);
+    data.set("filename", selectedFile.name);
 
     try {
-      const response = await client.send(command);
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: data,
+      });
+      console.log(res.json());
       setSuccess(true);
-      console.log(response);
     } catch (err) {
       console.error(err);
     }
-
-    // try {
-    //   const signedUrl = await getSignedUrl(client, command, {
-    //     expiresIn: 3600,
-    //   });
-    //   console.log(`Successfully uploaded file. URL: ${signedUrl}`);
-    // } catch (err) {
-    //   console.error("Error uploading file: ", err);
-    // }
   };
 
   return (
