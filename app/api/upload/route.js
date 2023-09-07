@@ -1,15 +1,6 @@
-working nextjs s3 file upload
+import { NextResponse } from "next/server";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
-1. removed global.css classes
-2. added page.js
-3. updated next.config.js to remove aws-crt warning
-4. npm install @aws-sdk/signature-v4-crt and then npm uninstall @aws-sdk/signature-v4-crt
-5. npm install @aws-sdk/client-s3
-6. rename env.example to .env.local and add your AWS credentials
-
-unpacking formData was challenging. the real trick was the arrayBuffer() method and then converting that to a buffer.
-
-```javascript
 export async function POST(req) {
   const data = await req.formData();
   console.log(data);
@@ -39,5 +30,14 @@ export async function POST(req) {
     Body: buffer,
   });
 
+  console.log(command);
 
-```
+  try {
+    const response = await client.send(command);
+    //setSuccess(true);
+    console.log(response);
+  } catch (err) {
+    console.error(err);
+  }
+  return NextResponse.json({ success: true });
+}
